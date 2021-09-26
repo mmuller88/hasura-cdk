@@ -30,33 +30,33 @@ const env = {
     account,
 };
 
-const hostedZoneId = process.env.HOSTED_ZONE_ID;
-if (!hostedZoneId) {
-    throw Error('HOSTED_ZONE_ID must be defined in environment');
-}
+// const hostedZoneId = process.env.HOSTED_ZONE_ID;
+// if (!hostedZoneId) {
+//     throw Error('HOSTED_ZONE_ID must be defined in environment');
+// }
 
-const hostedZoneName = process.env.HOSTED_ZONE_NAME;
-if (!hostedZoneName) {
-    throw Error('HOSTED_ZONE_NAME must be defined in environment');
-}
+// const hostedZoneName = process.env.HOSTED_ZONE_NAME;
+// if (!hostedZoneName) {
+//     throw Error('HOSTED_ZONE_NAME must be defined in environment');
+// }
 
-const hasuraHostname = process.env.HASURA_HOSTNAME;
-if (!hasuraHostname) {
-    throw Error('HASURA_HOSTNAME must be defined in environment');
-}
+// const hasuraHostname = process.env.HASURA_HOSTNAME;
+// if (!hasuraHostname) {
+//     throw Error('HASURA_HOSTNAME must be defined in environment');
+// }
 
-const actionsHostname = process.env.ACTIONS_HOSTNAME;
-if (!actionsHostname) {
-    throw Error('ACTIONS_HOSTNAME must be defined in environment');
-}
+// const actionsHostname = process.env.ACTIONS_HOSTNAME;
+// if (!actionsHostname) {
+//     throw Error('ACTIONS_HOSTNAME must be defined in environment');
+// }
 
-const certificatesStack = new CertificatesStack(app, `${appName}-HasuraCertificatesStack`, {
-    env,
-    hostedZoneId,
-    hostedZoneName,
-    actionsHostname,
-    hasuraHostname,
-});
+// const certificatesStack = new CertificatesStack(app, `${appName}-HasuraCertificatesStack`, {
+//     env,
+//     // hostedZoneId,
+//     // hostedZoneName,
+//     actionsHostname,
+//     hasuraHostname,
+// });
 
 const vpcStack = new VPCStack(app, `${appName}-HasuraVPCStack`, { env });
 
@@ -64,18 +64,18 @@ new HasuraStack(app, `${appName}-HasuraStack`, {
     env,
     vpc: vpcStack.vpc,
     appName,
-    certificates: certificatesStack.certificates,
-    hostedZoneId,
-    hostedZoneName,
-    hasuraHostname,
+    // certificates: certificatesStack.certificates,
+    // hostedZoneId,
+    // hostedZoneName,
+    // hasuraHostname,
     multiAz,
 });
 
 new ActionsStack(app, `${appName}-ActionsStack`, {
     env,
     appName,
-    certificates: certificatesStack.certificates,
-    hostedZoneId,
-    hostedZoneName,
-    actionsHostname,
+    // certificates: certificatesStack.certificates,
+    // hostedZoneId,
+    // hostedZoneName,
+    // actionsHostname,
 });

@@ -1,19 +1,19 @@
 import { StackProps, Stack, Construct, CfnOutput, RemovalPolicy } from '@aws-cdk/core';
-import { Vpc, SubnetType, InstanceType, InstanceClass, InstanceSize, Port, Protocol } from '@aws-cdk/aws-ec2';
+import { Vpc, InstanceType, InstanceClass, InstanceSize, Port, Protocol } from '@aws-cdk/aws-ec2';
 import { ApplicationLoadBalancedFargateService } from '@aws-cdk/aws-ecs-patterns';
 import { ContainerImage, Secret as ECSSecret } from '@aws-cdk/aws-ecs';
-import { PublicHostedZone } from '@aws-cdk/aws-route53';
+// import { PublicHostedZone } from '@aws-cdk/aws-route53';
 import { DatabaseInstance, DatabaseInstanceEngine, DatabaseSecret } from '@aws-cdk/aws-rds';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
-import { StringParameter } from '@aws-cdk/aws-ssm';
-import { Certificates } from './certificates-stack';
+// import { StringParameter } from '@aws-cdk/aws-ssm';
+// import { Certificates } from './certificates-stack';
 
 export interface HasuraStackProps extends StackProps {
     appName: string;
-    hostedZoneId: string;
-    hostedZoneName: string;
-    hasuraHostname: string;
-    certificates: Certificates;
+    // hostedZoneId: string;
+    // hostedZoneName: string;
+    // hasuraHostname: string;
+    // certificates: Certificates;
     vpc: Vpc;
     multiAz: boolean;
 }
@@ -22,10 +22,10 @@ export class HasuraStack extends Stack {
     constructor(scope: Construct, id: string, props: HasuraStackProps) {
         super(scope, id, props);
 
-        const hostedZone = PublicHostedZone.fromHostedZoneAttributes(this, 'HasuraHostedZone', {
-            hostedZoneId: props.hostedZoneId,
-            zoneName: props.hostedZoneName,
-        });
+        // const hostedZone = PublicHostedZone.fromHostedZoneAttributes(this, 'HasuraHostedZone', {
+        //     hostedZoneId: props.hostedZoneId,
+        //     zoneName: props.hostedZoneName,
+        // });
 
 
         const hasuraDatabaseName = props.appName;
@@ -97,7 +97,7 @@ export class HasuraStack extends Stack {
             cpu: 256,
             desiredCount: props.multiAz ? 2 : 1,
             taskImageOptions: {
-                image: ContainerImage.fromRegistry('hasura/graphql-engine:v1.2.1'),
+                image: ContainerImage.fromRegistry('hasura/graphql-engine:v2.0.9'),
                 containerPort: 8080,
                 enableLogging: true,
                 environment: {
@@ -113,9 +113,9 @@ export class HasuraStack extends Stack {
             },
             memoryLimitMiB: 512,
             publicLoadBalancer: true, // Default is false
-            certificate: props.certificates.hasura,
-            domainName: props.hasuraHostname,
-            domainZone: hostedZone,
+            // certificate: props.certificates.hasura,
+            // domainName: props.hasuraHostname,
+            // domainZone: hostedZone,
             assignPublicIp: true,
         });
 
