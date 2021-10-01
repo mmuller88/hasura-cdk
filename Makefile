@@ -33,8 +33,8 @@ deploy: build deploy-cdk post-deploy-cdk
 deploy-cdk:
 	cd cdk; AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} AWS_REGION=${AWS_REGION} APP_NAME=${APP_NAME} npx cdk deploy '*'  --outputs-file cdk.outputs.json
 
+destroy:
+	cd cdk; AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} AWS_REGION=${AWS_REGION} APP_NAME=${APP_NAME} npx cdk destroy '*' 
+
 post-deploy-cdk:
 	@cd cdk; AWS_REGION=${AWS_REGION} APP_NAME=${APP_NAME} HASURA_ADMIN_SECRET=${HASURA_ADMIN_SECRET} HASURA_JWT_SECRET=${HASURA_JWT_SECRET} npx ts-node bin/post-deploy.ts
-
-deploy-schema:
-	cd hasura; hasura migrate apply

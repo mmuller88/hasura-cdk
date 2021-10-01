@@ -2,19 +2,11 @@ import { StackProps, Stack, Construct, CfnOutput, RemovalPolicy } from '@aws-cdk
 import { Vpc, InstanceType, InstanceClass, InstanceSize, Port, Protocol } from '@aws-cdk/aws-ec2';
 import { ApplicationLoadBalancedFargateService } from '@aws-cdk/aws-ecs-patterns';
 import { ContainerImage, Secret as ECSSecret } from '@aws-cdk/aws-ecs';
-// import { PublicHostedZone } from '@aws-cdk/aws-route53';
-import { DatabaseInstance, DatabaseInstanceEngine, DatabaseSecret } from '@aws-cdk/aws-rds';
+import { Credentials, DatabaseInstance, DatabaseInstanceEngine, DatabaseSecret, PostgresEngineVersion } from '@aws-cdk/aws-rds';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
-// import { StringParameter } from '@aws-cdk/aws-ssm';
-// import { Certificates } from './certificates-stack';
 
 export interface HasuraStackProps extends StackProps {
     appName: string;
-    // hostedZoneId: string;
-    // hostedZoneName: string;
-    // hasuraHostname: string;
-    // certificates: Certificates;
-    vpc: Vpc;
     multiAz: boolean;
 }
 
@@ -22,24 +14,22 @@ export class HasuraStack extends Stack {
     constructor(scope: Construct, id: string, props: HasuraStackProps) {
         super(scope, id, props);
 
-        // const hostedZone = PublicHostedZone.fromHostedZoneAttributes(this, 'HasuraHostedZone', {
-        //     hostedZoneId: props.hostedZoneId,
-        //     zoneName: props.hostedZoneName,
-        // });
-
-
         const hasuraDatabaseName = props.appName;
+
+        const vpc = new Vpc(this, 'vpc');
 
         const hasuraDatabase = new DatabaseInstance(this, 'HasuraDatabase', {
             instanceIdentifier: props.appName,
             databaseName: hasuraDatabaseName,
-            engine: DatabaseInstanceEngine.POSTGRES,
+            engine: DatabaseInstanceEngine.postgres({
+                version: PostgresEngineVersion.VER_13_3,
+            }),
             instanceType: InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
-            masterUsername: 'syscdk',
+            credentials: Credentials.fromGeneratedSecret('syscdk'),
             storageEncrypted: true,
             allocatedStorage: 20,
             maxAllocatedStorage: 100,
-            vpc: props.vpc,
+            vpc,
             deletionProtection: false,
             multiAz: props.multiAz,
             removalPolicy: RemovalPolicy.DESTROY,
@@ -50,7 +40,6 @@ export class HasuraStack extends Stack {
         const hasuraUserSecret = new DatabaseSecret(this, 'HasuraDatabaseUser', {
             username: hasuraUsername,
             masterSecret: hasuraDatabase.secret,
-
         });
         hasuraUserSecret.attach(hasuraDatabase); // Adds DB connections information in the secret
 
@@ -93,7 +82,7 @@ export class HasuraStack extends Stack {
         // Create a load-balanced Fargate service and make it public
         const fargate = new ApplicationLoadBalancedFargateService(this, 'HasuraFargateService', {
             serviceName: props.appName,
-            vpc: props.vpc,
+            vpc,
             cpu: 256,
             desiredCount: props.multiAz ? 2 : 1,
             taskImageOptions: {
@@ -112,10 +101,7 @@ export class HasuraStack extends Stack {
                 },
             },
             memoryLimitMiB: 512,
-            publicLoadBalancer: true, // Default is false
-            // certificate: props.certificates.hasura,
-            // domainName: props.hasuraHostname,
-            // domainZone: hostedZone,
+            publicLoadBalancer: true,
             assignPublicIp: true,
         });
 

@@ -22,16 +22,7 @@ export class ActionsStack extends Stack {
     constructor(scope: Construct, id: string, props: ActionsStackProps) {
         super(scope, id, props);
 
-        // const hostedZone = PublicHostedZone.fromHostedZoneAttributes(this, 'HasuraHostedZone', {
-        //     hostedZoneId: props.hostedZoneId,
-        //     zoneName: props.hostedZoneName,
-        // });
-
         const api = new RestApi(this, 'ActionsApi', {
-            // domainName: {
-            //     domainName: props.actionsHostname,
-            //     certificate: props.certificates.actions,
-            // },
             restApiName: 'Actions',
             description: 'Endpoint For Hasura Actions',
             deployOptions: {
@@ -39,13 +30,6 @@ export class ActionsStack extends Stack {
                 dataTraceEnabled: true,
             },
         });
-
-        // API DNS record
-        // new ARecord(this, 'ActionsApiAliasRecord', {
-        //     zone: hostedZone,
-        //     recordName: props.actionsHostname,
-        //     target: AddressRecordTarget.fromAlias(new route53_targets.ApiGateway(api)),
-        // });
 
         // Create a lambda layer to contain node_modules
         const handlerDependenciesLayer = new RetainedLambdaLayerVersion(this, 'ActionHandlerDependencies', {
